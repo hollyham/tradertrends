@@ -5,36 +5,40 @@ class StockTable extends Component {
   constructor(props) {
      super(props) //since we are extending class Table so we have to use super in order to override Component class constructor
      this.state = { //state is by default an object
+        apiResponse: -1,
         stocks: [
            { ticker: 'AAPL', numShares: 1, avgPrice: 131, currPrice: 0 },
         ],
-        names: [
-           'AAPL',
-           'MSFT'
-        ]
+        stockTableVals: {}
      }
   }
 
    callAPI() {
-      var temp = -1;
-      fetch("http://localhost:9000/stockData")
+      fetch("http://localhost:9000/stockData/batch")
          .then(res => res.json())
-         .then(res => { temp = res.AAPL; });
-      // return temp;
+         .then(res => this.setState({ stockTableVals: res }))
+      //this.forceUpdate();
    }
 
    componentWillMount() {
-      var stockArr = [];
-      var i;
-      for (i = 0; i < this.state.names.length; i++) {
-         var currPrice = this.callAPI();
-         // console.log(currPrice);
-         stockArr.push({ ticker: this.state.names[i], numShares: 1, avgPrice: 131, currPrice: currPrice })
-      }
-      this.setState({ stocks: stockArr })
+      this.callAPI();
+      // this.getCurrPrices();
    }
 
   renderTableData() {
+     let stocks = this.state.stockTableVals;
+     return Object.keys(stocks).map((ticker, index) => {
+        return (
+           <tr key={index}>
+              <td>{ticker}</td>
+              <td>1</td>
+             <td>$100</td>
+              <td>{stocks[ticker]}</td>
+              <td><Button variant="danger">Sell</Button></td>
+           </tr>
+        )
+     })
+     /*
     return this.state.stocks.map((stock, index) => {
        const { ticker, numShares, avgPrice, currPrice } = stock //destructuring
        return (
@@ -42,11 +46,11 @@ class StockTable extends Component {
              <td>{ticker}</td>
              <td>{numShares}</td>
              <td>{avgPrice}</td>
-             <td>{currPrice}</td>
+             <td>{this.state.apiResponse}</td>
              <td><Button variant="danger">Sell</Button></td>
           </tr>
        )
-    })
+    })*/
  }
 
   render() { //Whenever our class runs, render method will be called automatically, it may have already defined in the constructor behind the scene.
